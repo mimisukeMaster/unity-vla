@@ -1,0 +1,7 @@
+# M3 comparison: pi0.5 DROID jointpos (openpi config pi05_droid_jointpos_polaris)
+policy:
+  type: openpi
+  variant: pi05
+  host: localhost
+  port: 8000
+  open_loop_horizon: 15

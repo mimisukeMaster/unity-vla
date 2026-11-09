@@ -1,0 +1,7 @@
+# M3: pi0 DROID jointpos (openpi config pi0_droid_jointpos_polaris)
+policy:
+  type: openpi
+  variant: pi0
+  host: localhost       # or wss://<your-app>.modal.run (then set port: null)
+  port: 8000
+  open_loop_horizon: 10

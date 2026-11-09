@@ -1,0 +1,30 @@
+# Unity
+unity/[Ll]ibrary/
+unity/[Tt]emp/
+unity/[Oo]bj/
+unity/[Bb]uild/
+unity/[Bb]uilds/
+unity/[Ll]ogs/
+unity/[Uu]ser[Ss]ettings/
+unity/[Mm]emoryCaptures/
+unity/[Rr]ecordings/
+unity/.vs/
+unity/.vscode/
+unity/*.csproj
+unity/*.sln
+unity/*.slnx
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+sysinfo.txt
+crashlytics-buildid.txt
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# experiment outputs
+runs/
+bridge/runs/

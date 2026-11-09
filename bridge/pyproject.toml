@@ -1,0 +1,33 @@
+[project]
+name = "unity-vla-bridge"
+version = "0.1.0"
+description = "Lockstep bridge between the Unity simulator and openpi policy servers"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "numpy>=1.26,<2.0",
+    "pyyaml>=6.0",
+    "imageio>=2.34",
+    "imageio-ffmpeg>=0.5",
+    "pillow>=10.0",
+    # Pinned to the openpi commit that Isaac Lab Arena uses (see server/OPENPI_COMMIT).
+    "openpi-client @ git+https://github.com/Physical-Intelligence/openpi.git@c23745b5ad24e98f66967ea795a07b2588ed6c79#subdirectory=packages/openpi-client",
+]
+
+[project.scripts]
+unity-vla = "unity_vla.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=8.0"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["unity_vla"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

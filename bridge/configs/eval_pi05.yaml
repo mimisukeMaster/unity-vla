@@ -1,0 +1,13 @@
+# M4: 20 fixed seeds x 3 prompts
+policy: {type: openpi, variant: pi05, host: localhost, port: 8000, open_loop_horizon: 15}
+task:
+  prompts:
+    - prompt: put the red cube in the bowl
+      scene: {goal: {type: place, target: red_cube, container: bowl}}
+    - prompt: put the blue cube in the bowl
+      scene: {goal: {type: place, target: blue_cube, container: bowl}}
+    - prompt: pick up the green cube
+      scene: {goal: {type: lift, target: green_cube, height: 0.08}}
+episodes:
+  seeds: [100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119]
+record: {video: true}

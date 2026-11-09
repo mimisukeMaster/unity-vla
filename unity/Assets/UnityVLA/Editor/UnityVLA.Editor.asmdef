@@ -1,0 +1,12 @@
+{
+    "name": "UnityVLA.Editor",
+    "rootNamespace": "UnityVLA.Editor",
+    "references": ["UnityVLA.Runtime"],
+    "includePlatforms": ["Editor"],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "noEngineReferences": false
+}

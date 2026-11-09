@@ -1,0 +1,6 @@
+* text=auto
+*.bytes binary
+*.png binary
+*.mp4 binary
+*.cs text eol=lf
+*.json text eol=lf

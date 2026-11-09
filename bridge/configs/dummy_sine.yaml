@@ -1,0 +1,4 @@
+# M2: lockstep + determinism. Run twice and compare episode.npz (tests/compare_runs.py).
+policy: {type: dummy, mode: sine, amplitude: 0.25, period_s: 4.0}
+task: {max_steps: 300}
+episodes: {seeds: [0, 0, 0]}

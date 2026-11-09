@@ -1,0 +1,4 @@
+# M2: ArticulationBody stays where it is put (no sag, no drift)
+policy: {type: dummy, mode: hold}
+task: {max_steps: 300}
+episodes: {seeds: [0, 1, 2]}
