@@ -74,7 +74,6 @@ namespace UnityVLA
                 float qi = Mathf.Clamp(q[i], lower[i], upper[i]);
                 joints[i].jointPosition = new ArticulationReducedSpace(ToDrive(i, qi));
                 joints[i].jointVelocity = new ArticulationReducedSpace(0f);
-                joints[i].jointAcceleration = new ArticulationReducedSpace(0f);
             }
             SetArmTargets(q);
         }
