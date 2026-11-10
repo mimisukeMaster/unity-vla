@@ -68,10 +68,13 @@ namespace UnityVLA
         static int UnityWindingSign()
         {
             if (unityWindingSign != 0) return unityWindingSign;
+            // The temporary primitive must disappear immediately: a deferred Destroy would leave
+            // a 1 m box collider at the origin for the rest of the frame and fling the robot.
             var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            go.GetComponent<Collider>().enabled = false;
             var m = go.GetComponent<MeshFilter>().sharedMesh;
             unityWindingSign = WindingSign(m.vertices, m.normals, m.triangles);
-            DestroyAny(go);
+            UnityEngine.Object.DestroyImmediate(go);
             return unityWindingSign;
         }
 
