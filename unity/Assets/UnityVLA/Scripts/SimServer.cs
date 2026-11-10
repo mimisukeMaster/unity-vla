@@ -243,8 +243,16 @@ namespace UnityVLA
             Scene = TaskScene.Build(world, scene, seed);
             Cameras = CameraRig.Build(world, Robot.hand, scene?.Obj("cameras") ?? new Dictionary<string, object>());
 
+            string Positions()
+            {
+                var sb = new System.Text.StringBuilder();
+                foreach (var kv in Scene.Objects) sb.Append($" {kv.Key}={kv.Value.Body.position.ToString("F3")}");
+                return sb.ToString();
+            }
+            Debug.Log($"[UnityVLA] reset seed={seed} spawned:{Positions()}");
             // let objects settle with the arm held at home
             for (int i = 0; i < Mathf.RoundToInt(0.5f / physicsDt); i++) Physics.Simulate(physicsDt);
+            Debug.Log($"[UnityVLA] reset seed={seed} settled:{Positions()}");
             Robot.gripper.SetVisual(Robot.gripper.Measured());
             simTime = 0f;
             stepsThisEpisode = 0;
