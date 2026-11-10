@@ -12,14 +12,14 @@ namespace UnityVLA
     [Serializable]
     public class RobotSettings
     {
-        // Units: ArticulationDrive uses degrees for revolute joints.
-        // 35 N·m/deg ≈ 2000 N·m/rad, 1.75 N·m·s/deg ≈ 100 N·m·s/rad (wrist: 500 / 25).
-        [Tooltip("Drive stiffness per arm joint (N·m/deg)")]
-        public float[] stiffness = { 35, 35, 35, 35, 9, 9, 9 };
-        [Tooltip("Drive damping per arm joint (N·m·s/deg)")]
-        public float[] damping = { 1.75f, 1.75f, 1.75f, 1.75f, 0.45f, 0.45f, 0.45f };
-        [Tooltip("Torque limit per arm joint (N·m). Above the Franka spec (87/12) so the sim tracks like DROID's controller.")]
-        public float[] forceLimit = { 300, 300, 300, 300, 100, 100, 100 };
+        // Chosen with the Diag_GainSweep PlayMode test: settled error 0, no oscillation,
+        // tracks a 0.3 rad / 0.7 Hz sine at 15 Hz commands.  (Revolute targets are in degrees.)
+        [Tooltip("Drive stiffness per arm joint")]
+        public float[] stiffness = { 5000, 5000, 5000, 5000, 1250, 1250, 1250 };
+        [Tooltip("Drive damping per arm joint")]
+        public float[] damping = { 250, 250, 250, 250, 62.5f, 62.5f, 62.5f };
+        [Tooltip("Torque limit per arm joint (N·m). Above the Franka spec so the sim tracks like DROID's controller.")]
+        public float[] forceLimit = { 1000, 1000, 1000, 1000, 300, 300, 300 };
         public bool armGravity = false;
         [Tooltip("Closing force limit per finger (N)")]
         public float gripForce = 40f;
