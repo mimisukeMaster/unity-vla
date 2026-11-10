@@ -250,8 +250,22 @@ namespace UnityVLA
                 return sb.ToString();
             }
             Debug.Log($"[UnityVLA] reset seed={seed} spawned:{Positions()}");
+            foreach (var kv in Scene.Objects)
+            {
+                var b = new Bounds(kv.Value.Body.position, Vector3.zero);
+                foreach (var c in kv.Value.Body.GetComponentsInChildren<Collider>()) b.Encapsulate(c.bounds);
+                var hits = Physics.OverlapBox(b.center, b.extents * 0.98f);
+                var names = new List<string>();
+                foreach (var hcol in hits)
+                    if (hcol.attachedRigidbody != kv.Value.Body) names.Add($"{hcol.transform.parent?.name}/{hcol.name}");
+                Debug.Log($"[UnityVLA] overlap {kv.Key} bounds={b.center.ToString("F3")}+-{b.extents.ToString("F3")}: {string.Join(", ", names)}");
+            }
             // let objects settle with the arm held at home
-            for (int i = 0; i < Mathf.RoundToInt(0.5f / physicsDt); i++) Physics.Simulate(physicsDt);
+            for (int i = 0; i < Mathf.RoundToInt(0.5f / physicsDt); i++)
+            {
+                Physics.Simulate(physicsDt);
+                if (i < 3 || i % 50 == 0) Debug.Log($"[UnityVLA] settle {i}:{Positions()} pinch={Robot.gripper.pinch.position.ToString("F3")}");
+            }
             Debug.Log($"[UnityVLA] reset seed={seed} settled:{Positions()}");
             Robot.gripper.SetVisual(Robot.gripper.Measured());
             simTime = 0f;
