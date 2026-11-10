@@ -138,5 +138,37 @@ namespace UnityVLA.Tests
             var b = Run();
             for (int j = 0; j < 7; j++) Assert.AreEqual(a[j], b[j], 1e-4f, $"joint {j + 1}");
         }
+
+        /// Diagnostics: which input makes the arm diverge?
+        [UnityTest]
+        public IEnumerator Diag_Divergence()
+        {
+            foreach (var mode in new[] { "arm_sine", "gripper_toggle", "hold_home", "both" })
+            {
+                foreach (Transform t in host.transform) { t.gameObject.SetActive(false); Object.Destroy(t.gameObject); }
+                var robot = RobotFactory.Build(host.transform);
+                var home = robot.homeQpos;
+                var q = (float[])home.Clone();
+                float worst = 0; int worstJ = -1, worstStep = -1;
+                for (int s = 0; s < 60; s++)
+                {
+                    if (mode == "arm_sine" || mode == "both")
+                        for (int j = 0; j < 7; j++) q[j] = home[j] + 0.3f * Mathf.Sin(0.2f * s + j);
+                    robot.SetArmTargets(q);
+                    if (mode == "gripper_toggle" || mode == "both") robot.gripper.SetCommand(s % 30 < 15 ? 1f : 0f);
+                    Simulate(1f / 15f);
+                    var qa = robot.GetArmPositions();
+                    for (int j = 0; j < 7; j++)
+                    {
+                        float e = Mathf.Abs(qa[j] - q[j]);
+                        if (e > worst) { worst = e; worstJ = j + 1; worstStep = s; }
+                    }
+                    if (s < 3 || s % 15 == 0)
+                        Debug.Log($"[UnityVLA] diag {mode} step {s}: q=({string.Join(",", System.Array.ConvertAll(qa, x => x.ToString("F2")))}) g={robot.gripper.Measured():F2}");
+                }
+                Debug.Log($"[UnityVLA] diag {mode}: worst {worst:F4} rad at joint {worstJ} step {worstStep}");
+                yield return null;
+            }
+        }
     }
 }
