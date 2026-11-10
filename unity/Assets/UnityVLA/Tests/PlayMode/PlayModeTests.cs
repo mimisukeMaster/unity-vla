@@ -139,34 +139,42 @@ namespace UnityVLA.Tests
             for (int j = 0; j < 7; j++) Assert.AreEqual(a[j], b[j], 1e-4f, $"joint {j + 1}");
         }
 
-        /// Diagnostics: which input makes the arm diverge?
+        /// Diagnostics: tracking lag of a 0.3 rad sine for several drive gain sets.
         [UnityTest]
-        public IEnumerator Diag_Divergence()
+        public IEnumerator Diag_GainSweep()
         {
-            foreach (var mode in new[] { "arm_sine", "gripper_toggle", "hold_home", "both" })
+            var sets = new (float k, float d, float kw, float dw)[]
+            {
+                (35, 1.75f, 9, 0.45f), (200, 10, 50, 2.5f), (1000, 50, 250, 12.5f),
+                (5000, 250, 1250, 62.5f), (20000, 1000, 5000, 250),
+            };
+            foreach (var g in sets)
             {
                 foreach (Transform t in host.transform) { t.gameObject.SetActive(false); Object.Destroy(t.gameObject); }
-                var robot = RobotFactory.Build(host.transform);
+                var st = new RobotSettings
+                {
+                    stiffness = new[] { g.k, g.k, g.k, g.k, g.kw, g.kw, g.kw },
+                    damping = new[] { g.d, g.d, g.d, g.d, g.dw, g.dw, g.dw },
+                    forceLimit = new float[] { 1000, 1000, 1000, 1000, 300, 300, 300 },
+                };
+                var robot = RobotFactory.Build(host.transform, st);
                 var home = robot.homeQpos;
                 var q = (float[])home.Clone();
-                float worst = 0; int worstJ = -1, worstStep = -1;
-                for (int s = 0; s < 60; s++)
+                float worst = 0, settle = 0;
+                for (int s = 0; s < 90; s++)
                 {
-                    if (mode == "arm_sine" || mode == "both")
-                        for (int j = 0; j < 7; j++) q[j] = home[j] + 0.3f * Mathf.Sin(0.2f * s + j);
+                    if (s < 60) for (int j = 0; j < 7; j++) q[j] = home[j] + 0.3f * Mathf.Sin(0.2f * s + j);
                     robot.SetArmTargets(q);
-                    if (mode == "gripper_toggle" || mode == "both") robot.gripper.SetCommand(s % 30 < 15 ? 1f : 0f);
+                    robot.gripper.SetCommand(s % 30 < 15 ? 1f : 0f);
                     Simulate(1f / 15f);
                     var qa = robot.GetArmPositions();
                     for (int j = 0; j < 7; j++)
                     {
                         float e = Mathf.Abs(qa[j] - q[j]);
-                        if (e > worst) { worst = e; worstJ = j + 1; worstStep = s; }
+                        if (s < 60) worst = Mathf.Max(worst, e); else if (s == 89) settle = Mathf.Max(settle, e);
                     }
-                    if (s < 3 || s % 15 == 0)
-                        Debug.Log($"[UnityVLA] diag {mode} step {s}: q=({string.Join(",", System.Array.ConvertAll(qa, x => x.ToString("F2")))}) g={robot.gripper.Measured():F2}");
                 }
-                Debug.Log($"[UnityVLA] diag {mode}: worst {worst:F4} rad at joint {worstJ} step {worstStep}");
+                Debug.Log($"[UnityVLA] gains k={g.k} d={g.d} kw={g.kw} dw={g.dw}: worst lag {worst:F4} rad, settled err {settle:F5} rad");
                 yield return null;
             }
         }
