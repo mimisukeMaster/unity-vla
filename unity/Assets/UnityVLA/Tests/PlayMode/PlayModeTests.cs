@@ -119,13 +119,18 @@ namespace UnityVLA.Tests
                 var robot = RobotFactory.Build(host.transform);
                 var home = robot.homeQpos;
                 var q = new float[7];
+                float worst = 0;
                 for (int s = 0; s < 60; s++)
                 {
                     for (int j = 0; j < 7; j++) q[j] = home[j] + 0.3f * Mathf.Sin(0.2f * s + j);
                     robot.SetArmTargets(q);
                     robot.gripper.SetCommand(s % 30 < 15 ? 1f : 0f);
                     Simulate(1f / 15f);
+                    var qa = robot.GetArmPositions();
+                    for (int j = 0; j < 7; j++) worst = Mathf.Max(worst, Mathf.Abs(qa[j] - q[j]));
                 }
+                Debug.Log($"[UnityVLA] determinism run: worst |q - target| = {worst:F4} rad");
+                Assert.Less(worst, 0.5f, "arm diverged from its targets (unstable physics)");
                 return robot.GetArmPositions();
             }
             var a = Run();

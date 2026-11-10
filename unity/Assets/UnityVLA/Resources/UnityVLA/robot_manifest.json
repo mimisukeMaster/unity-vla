@@ -855,7 +855,7 @@
    }
   ],
   "collider": {
-   "mesh": "2f85_base"
+   "mesh": "2f85_base_hull"
   },
   "pinch": [
    0.0,

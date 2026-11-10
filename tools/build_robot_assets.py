@@ -141,6 +141,25 @@ def write_mesh(mesh: trimesh.Trimesh, path: Path, scale=1.0):
     return len(vu), len(idx) // 3
 
 
+def collision_hull(mesh: trimesh.Trimesh, max_faces: int = 250) -> trimesh.Trimesh:
+    """Convex hull with at most max_faces triangles (Unity's convex MeshCollider limit is 255).
+    Reduces the point set by farthest-point sampling until the hull is small enough."""
+    hull = mesh.convex_hull
+    pts = np.asarray(hull.vertices)
+    n = min(len(pts), 126)
+    while len(hull.faces) > max_faces and n >= 8:
+        idx = [0]
+        d = np.linalg.norm(pts - pts[0], axis=1)
+        for _ in range(n - 1):
+            k = int(np.argmax(d))
+            idx.append(k)
+            d = np.minimum(d, np.linalg.norm(pts - pts[k], axis=1))
+        hull = trimesh.Trimesh(pts[idx]).convex_hull
+        n -= 8
+    hull.fix_normals()
+    return hull
+
+
 def load_mesh(path: Path) -> trimesh.Trimesh:
     m = trimesh.load(path, force="mesh", process=True)
     if not isinstance(m, trimesh.Trimesh):
@@ -206,9 +225,12 @@ def build_panda(mdir: Path, out_mesh: Path, report: list):
             fname = mesh_files[mesh_name]
             stem = "panda_" + Path(fname).stem
             mesh = load_mesh(assets / fname)
+            is_visual = g.get("class") == "panda/visual"
+            if not is_visual:
+                mesh = collision_hull(mesh)
             nv, nt = write_mesh(mesh, out_mesh / f"{stem}.bytes")
             report.append((stem, nv, nt))
-            if g.get("class") == "panda/visual":
+            if is_visual:
                 visuals.append(
                     {"mesh": stem, "color": materials.get(g.get("material"), [1, 1, 1, 1])}
                 )
@@ -276,7 +298,9 @@ def build_gripper(mdir: Path, out_mesh: Path, report: list):
         dict(mesh_entry("base_mount", "black"), **pose_fields(T_base_mount)),
         dict(mesh_entry("base", "black"), **pose_fields(np.eye(4))),
     ]
-    collider_base = {"mesh": "2f85_base"}
+    hull = collision_hull(load_mesh(gdir / "assets" / "base.stl"))
+    write_mesh(hull, out_mesh / "2f85_base_hull.bytes", scale=0.001)
+    collider_base = {"mesh": "2f85_base_hull"}
 
     # joint angles as function of g (parallel-jaw approximation, see docs/robot_model.md)
     def joint_angles(g):

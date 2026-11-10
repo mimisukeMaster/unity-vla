@@ -98,7 +98,7 @@ namespace UnityVLA
                 lat.transform.localPosition = rest.V3("pos");
                 lat.transform.localRotation = restRot;
                 side.latRestPos = lat.transform.localPosition;
-                side.lat = Prismatic(lat, latLocal, 0.02f, s);
+                side.lat = Prismatic(lat, latLocal, 0.1f, s);
                 Limits(side.lat, side.latTable);
 
                 var vert = new GameObject($"{side.name}_pad_vert");
@@ -115,7 +115,7 @@ namespace UnityVLA
                     bc.sharedMaterial = padMat;
                     robot.colliders.Add(bc);
                 }
-                side.vert = Prismatic(vert, side.vertAxisLocal, 0.02f, s);
+                side.vert = Prismatic(vert, side.vertAxisLocal, 0.1f, s);
                 Limits(side.vert, side.vertTable);
                 sideList.Add(side);
             }
